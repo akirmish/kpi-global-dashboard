@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KT Global KPI Dashboard - Q2 2025</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .filter-container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        
+        .filter-group select {
+            padding: 8px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        .filter-group select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #f1f3f4;
+            vertical-align: top;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        tr:hover {
+            background: #e3f2fd;
+            transition: background-color 0.3s;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+            border-radius: 10px;
+            transition: width 0.8s ease;
+            position: relative;
+        }
+        
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-in-progress {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-not-started {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .country-flag {
+            display: inline-block;
+            width: 20px;
+            height: 15px;
+            margin-right: 8px;
+            border-radius: 2px;
+            background: #ddd;
+            text-align: center;
+            line-height: 15px;
+            font-size: 10px;
+        }
+        
+        .text-only {
+            font-style: italic;
+            color: #6c757d;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .filter-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .stats-overview {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            th, td {
+                padding: 8px 5px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>🌱 KT Global KPI Dashboard</h1>
+            <p>Performance Tracking - Q2 2025</p>
+        </div>
+        
+        <div class="controls">
+            <div class="filter-container">
+                <div class="filter-group">
+                    <label for="targetFilter">Global Target:</label>
+                    <select id="targetFilter">
+                        <option value="all">All Targets</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="countryFilter">Country:</label>
+                    <select id="countryFilter">
+                        <option value="all">All Countries</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="statusFilter">Status:</label>
+                    <select id="statusFilter">
+                        <option value="all">All Status</option>
+                        <option value="completed">Completed</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="not-started">Not Started</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-value" id="totalKPIs">0</div>
+                <div class="stat-label">Total KPIs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completedKPIs">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="inProgressKPIs">0</div>
+                <div class="stat-label">In Progress</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgProgress">0%</div>
+                <div class="stat-label">Avg Progress</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="table-container">
+                <div class="table-wrapper">
+                    <table id="kpiTable">
+                        <thead>
+                            <tr>
+                                <th>Global Target</th>
+                                <th>Country</th>
+                                <th>KPIs</th>
+                                <th>Metrics</th>
+                                <th>Q1 2025</th>
+                                <th>Q2 2025</th>
+                                <th>Progress</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="kpiTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // KPI Data
+        const kpiData = [
+            {
+                globalTarget: "Accelerating adoption among farmers",
+                country: "KT Global",
+                kpis: "Creating and implementing at least 1 pilot to accelerate adoptions",
+                metrics: "Implementation of 1 pilot project and sharing learnings with other countries",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Accelerating adoption among farmers",
+                country: "Bangladesh",
+                kpis: "Supporting 270 adoption farmers",
+                metrics: "270 adoption farmers will be supported by # farmers through advisory services, #farmers with inputs supports (ipm, nursery shades)",
+                q1: "68",
+                q2: "111",
+                progress: "41.11%"
+            },
+            {
+                globalTarget: "Accelerating adoption among farmers",
+                country: "Ghana",
+                kpis: "",
+                metrics: "Refresher trainings in old intervention communities. One mass training per community on selected topic (s) . Technical support to 50 adoption farmers",
+                q1: "",
+                q2: "",
+                progress: ""
+            },
+            {
+                globalTarget: "Accelerating adoption among farmers",
+                country: "India",
+                kpis: "Support 6000 farmers with technical advice for adoptions",
+                metrics: "- 800 (530 India +270 BD) adoption farmers supported with technical advice\n- 100 trainings for adoption farmers on crop & variety selection + IPM (India)\n- # pre-season meetings with farmers along with sales team\n- Data collection on adoptions on a regular basis (we need a system to document the adoptions in CMS?)\n- # Exposure visit to Learning farms",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Accelerating adoption among farmers",
+                country: "Nigeria",
+                kpis: "8,000 farmers will be reached by creating and implementing a pilot on accelerating adoptions",
+                metrics: "Using a modeled refresher training approach in the context of HortiNigeria's old intervention : Number of LGA 15, communities =50, Farmers per cluster =11,cluster per LGA=550 (Hence total number of farmers to be outreached =8250",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Improving business skills & market access to farmers",
+                country: "KT Global",
+                kpis: "Every demo has a business plan before establishing the plot",
+                metrics: "Printed copy of business plan is in all key farmer record books",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Improving business skills & market access to farmers",
+                country: "Bangladesh",
+                kpis: "180 Commercial demos has got a business plan before establishing plot",
+                metrics: "100% demos (180 Demos) with Business plan recorded in the farmer record books",
+                q1: "56",
+                q2: "92",
+                progress: "51.11%"
+            },
+            {
+                globalTarget: "Improving business skills & market access to farmers",
+                country: "Cambodia",
+                kpis: "Every demo has got a business plan before establishing plot",
+                metrics: "At least one training to key farmer on Business plan and 100% key farmer has Business plan in the farmer record books",
+                q1: "The selection of villages and key farmers is still ongoing.",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Improving business skills & market access to farmers",
+                country: "Ghana",
+                kpis: "Every demo has got a business plan before establishing plot",
+                metrics: "Business plan to be documented in the key farmer record books. At least 300 demos with each TFO having 30 demos",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Improving business skills & market access to farmers",
+                country: "India",
+                kpis: "Every demo has got a business plan before establishing plot",
+                metrics: "- 910 Business plans (730 India + 180 BD)\n- 70% of field days - discussion on business plan vs RoI\n- 60% of plots with variety signboards",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Improving business skills & market access to farmers",
+                country: "Myanmar",
+                kpis: "Business plan has to be in the farmer record books",
+                metrics: "768 demo plots (which is 80% of total 960.) Q -4",
+                q1: "0",
+                q2: "164",
+                progress: "21.35%"
+            },
+            {
+                globalTarget: "Improving business skills & market access to farmers",
+                country: "Nigeria",
+                kpis: "800 demonstrations has got a business plan before establishing plot",
+                metrics: "40,000 copies of business plans be provided to ever farmer in a cluster, including record books to Key farmers",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Improving business skills & market access to farmers",
+                country: "Philippines",
+                kpis: "Train 100% of the 300 key farmers on business plan development by Q4 2025, with all of them submitting documented business plans in their record books before establishing demo plots",
+                metrics: "Business plan has to be in the farmer record books",
+                q1: "Initial batch of key farmers trained:\n135 key farmers trained, all submitted business plans",
+                q2: "240 key farmers trained on (Jan to Jul, cumulative),\nall submitted business plans before planting",
+                progress: "80%"
+            },
+            {
+                globalTarget: "Improving business skills & market access to farmers",
+                country: "Tanzania",
+                kpis: "Every demo has got a business plan before establishing plot",
+                metrics: "Business plan developed for 300 demo plots and included in the farmer record books before establishing a demo plot by December 2025",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Improving business skills & market access to farmers",
+                country: "Uganda",
+                kpis: "Ensure that every demo has a business plan before establishing the plot",
+                metrics: "Business plan has to be in the farmer record books and 210 of training on business plan conducted",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Demo farm performance",
+                country: "KT Global",
+                kpis: "80% of demo plots achieve average targeted yields for farmers & host field day",
+                metrics: "# of plots with average yields (as a defined by TSH)\n# of plots which host a farmer field day",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Demo farm performance",
+                country: "Bangladesh",
+                kpis: "80% of demo plots achieve average targeted yields for farmers & host field day",
+                metrics: "Agreed benchmarks of yield as per TSH\nDashboard for tracking average yields\n# of plots with average yields",
+                q1: "First Q none of the demo completed which started this year",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Demo farm performance",
+                country: "Cambodia",
+                kpis: "80% of 500-600 demo plots achieve average targeted yields for farmers & host field day",
+                metrics: "80% of 500-600 demo plots have quality and 25% increase yield at the end of 2025",
+                q1: "The selection of villages and key farmers is still ongoing.",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Demo farm performance",
+                country: "Ghana",
+                kpis: "80% of demo plots achieve average targeted yields for farmers & host field day",
+                metrics: "Agreed benchmarks of yield as per TSH\n80% plots with average yields",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Demo farm performance",
+                country: "India",
+                kpis: "80% of demo plots achieve average targeted yields for farmers & host field day",
+                metrics: "- 300 demos with average yields in India (60% of total demos)\n- Quality improvement project to bring top 5 crops in each state to average yields (aligned with TSH) in 20% of total demos",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Demo farm performance",
+                country: "Nigeria",
+                kpis: "80% of demo plots achieve average targeted yields for farmers & host field day",
+                metrics: "Agreed benchmarks /standards to be considered will be communicated by the TSH",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Demo farm performance",
+                country: "Philippines",
+                kpis: "Ensure that 80% of the total 300 demo plots achieve the average yield increase by Q4 2025",
+                metrics: "Agreed benchmarks of yield as per TSH\n# of plots with average yields",
+                q1: "demos are still ongoing, evaluation will follow after demo completion",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Demo farm performance",
+                country: "Tanzania",
+                kpis: "80% of demo plots achieve average targeted yields for farmers & host field day",
+                metrics: "80% demo plots achieve agreed targeted yields per variety for farmers as per TSH\nand conduct farmers field day for each successful demo",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Demo farm performance",
+                country: "Uganda",
+                kpis: "80% of the 210 demo plots achieve average targeted yields for farmers & host field day for each demo",
+                metrics: "Agreed benchmarks of yield as per TSH\n210 of plots with average yields and conduct a FFD for each demo",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Demo farm performance",
+                country: "KT Global",
+                kpis: "Successfully piloted certification program for farmers",
+                metrics: "Implementation of 1 certification pilot program in India and Uganda",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Demo farm performance",
+                country: "Bangladesh",
+                kpis: "Piloting certification program for 24 CFF by May 2025",
+                metrics: "24 CFF will get certificate by May 2025",
+                q1: "0",
+                q2: "Assessment done, we are planning to have certification event in July",
+                progress: "50%"
+            },
+            {
+                globalTarget: "Demo farm performance",
+                country: "India",
+                kpis: "Successfully piloted certification program for farmers",
+                metrics: "- Support FEM Head on piloting certification in Odisha with 100 farmers",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Demo farm performance",
+                country: "Tanzania",
+                kpis: "Successfully piloted certification program for farmers",
+                metrics: "150 youth vegetable farmers certified on improved vegetable production techniques in all KT operational areas",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Demo farm performance",
+                country: "Uganda",
+                kpis: "Successfully piloted certification program for farmers",
+                metrics: "Certify all the 2500 farmers in Northern Uganda under the finance access pilot project",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Nurturing progress - long term sustainable growth in old KT areas",
+                country: "Global",
+                kpis: "Assemble key farmers into clusters for continuous engagement",
+                metrics: "various ways to assemble a cluster (per location, online, etc)\n- events, digital communication, pre-season meetings with sales team (anything)",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Nurturing progress - long term sustainable growth in old KT areas",
+                country: "Bangladesh",
+                kpis: "Assemble key farmers into clusters for continuous engagement\n- 40 cross visit, 32 preseason meeting, 64 refreshers course in old areas",
+                metrics: "The Key farmer will be grouped based on CFF areas and ag input dealer/retailer- connecting with EWS",
+                q1: "Cross visit- 17 events with 344 farmers\nPre-season meeting- 09 with 305 farmers\nRefreshers course- 8 events with 421 farmers",
+                q2: "Cross visit- 15 events with 329 farmers\nPre-season meeting- 20 with 953 farmers\nRefreshers course- 32 events with 1587 farmers",
+                progress: "75%"
+            },
+            {
+                globalTarget: "Nurturing progress - long term sustainable growth in old KT areas",
+                country: "Cambodia",
+                kpis: "Assemble key farmers into clusters for continuous engagement",
+                metrics: "- 7 Cluster the existing KT areas and engament to relevant stakeholder for support to be sustainable. ( Social media, AC, NGOs, EWS...)",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Nurturing progress - long term sustainable growth in old KT areas",
+                country: "Ghana",
+                kpis: "Assemble key farmers into clusters for continuous engagement, with 1 group per district in 2025",
+                metrics: "Work with partners such as government extension and possibly Agriterra, EWS to form and maintain groups for information on technical training, market and funding opportunities. various ways to assemble a cluster (per location, online, etc)\n- events, digital communication, pre-season meetings with sales team, depending on what works best in each area. A total of 140 key farmers across 14 clusters, with 1 cluster per district, each cluster having at least 10key farmers",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Nurturing progress - long term sustainable growth in old KT areas",
+                country: "India",
+                kpis: "Assemble key farmers into clusters for continuous engagement",
+                metrics: "- # Pre-season meetings with farmers along with sales team in old areas\n- # Digital campaigns in old areas\n- Adding farmers in whatsapp groups\n- 20 key farmers as CFTs",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Nurturing progress - long term sustainable growth in old KT areas",
+                country: "Myanmar",
+                kpis: "Assemble key farmers into clusters for continuous engagement",
+                metrics: "- start from Q- 4 by digital ways in Internet accessable areas ( 100 member from SSS and NPT)\n- KT 150 farmers and user Groupping in Greenway Agri app (colloborative partner)",
+                q1: "0",
+                q2: "We've already collected > 200 farmers survey and will continue grouping in the coming period.",
+                progress: "35%"
+            },
+            {
+                globalTarget: "Nurturing progress - long term sustainable growth in old KT areas",
+                country: "Nigeria",
+                kpis: "750 clusters will be formed in 50 local goverment areas",
+                metrics: "750 clusters will be formed in HortiNigeria refresher training locations",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Nurturing progress - long term sustainable growth in old KT areas",
+                country: "Philippines",
+                kpis: "Organize the 300 key farmers into functional marketing clusters for continuous engagement through at least 3 structured events by Q4 2025",
+                metrics: "various ways to assemble a cluster (per location, online, etc)\n- events, digital communication, pre-season meetings with sales team (anything)",
+                q1: "82 farmers",
+                q2: "212 key farmers from Batch 1 (Clusters 1, 2, and 3) and Batch 2 (Cluster 1) are now organized into functional marketing clusters with supply, production, and marketing plans. Planning activities have been completed, and farmers have begun consolidating and delivering their produce",
+                progress: "70%"
+            },
+            {
+                globalTarget: "Nurturing progress - long term sustainable growth in old KT areas",
+                country: "Tanzania",
+                kpis: "Assemble key farmers into clusters for continuous engagement",
+                metrics: "Vegetable farmers in KT areas clustered in 5 groups based on crops with an average of 50 farmers per cluster for continued engagement and suppoprt by KT, CFTs, EWS promotional team and GEOs",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Technical capacity",
+                country: "Global",
+                kpis: "Identify the skills gap of field staff and delivery of need-based trainings",
+                metrics: "Skills assessment and creation of training implementation plan",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Technical capacity",
+                country: "Bangladesh",
+                kpis: "Organize one training on soft skill for the staff by conducting training need assessment with the help of HR by June 2025",
+                metrics: "19 staff will get the training on soft skill",
+                q1: "0",
+                q2: "In August we will organize the training, already a external resources selected, now preparing for the details agenda",
+                progress: "60%"
+            },
+            {
+                globalTarget: "Technical capacity",
+                country: "Cambodia",
+                kpis: "Identify the skills gap of field staff and delivery of need-based trainings",
+                metrics: "- Skill assessment and creation of training implementation plan.\n- Conduct 2 refresh training on technical knowledge for TFOs and EWS staff per year (new staff onboard).\n- Sharing the action research on Green Manure from KT learning fram to all TFOs in Q4.",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Technical capacity",
+                country: "Ghana",
+                kpis: "Identify the skills gap of field staff and delivery of need-based trainings",
+                metrics: "Skills assessment and creation of training implementation plan",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Technical capacity",
+                country: "India",
+                kpis: "Identify the skills gap of field staff and delivery of need-based trainings",
+                metrics: "- IDPs for select positions in collaboration with HR\n- 2# Extension trainings for TFOs (external)\n- 2 softskill trainings to team (1 India+1 BD)\n- 4# of gender sensitivity trainings to Team members",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Technical capacity",
+                country: "Myanmar",
+                kpis: "Skills assessment and creation of training implementation plan",
+                metrics: "Assessment on Q1 and training implememtation plan on Q2 with TSH",
+                q1: "0",
+                q2: "After finishing the assessment for the staff in Q 1& 2 . We provide training in July .",
+                progress: "45%"
+            },
+            {
+                globalTarget: "Technical capacity",
+                country: "Philippines",
+                kpis: "Conduct a skills gap assessment for field staff by Q3 and design at least 1 tailored training program",
+                metrics: "Skills assessment and creation of training implementation plan",
+                q1: "0",
+                q2: "Skills gap assessment tool developed, assessment completed. Results analysis and training program customiztaion pending",
+                progress: "65%"
+            },
+            {
+                globalTarget: "Technical capacity",
+                country: "Tanzania",
+                kpis: "Identify the skills gap of field staff and delivery of need-based trainings",
+                metrics: "Indvidual staff skills assessment and creation of training implementation plan by 30th April 2025",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            },
+            {
+                globalTarget: "Technical capacity",
+                country: "Uganda",
+                kpis: "Identify the skills gap of field staff and delivery of need-based trainings",
+                metrics: "Skills assessment and creation of training implementation plan - Train TFOs on group dynamics and Technical aspects",
+                q1: "0",
+                q2: "0",
+                progress: "0"
+            }
+        ];
+
+        // Helper functions
+        function isNumeric(str) {
+            return !isNaN(str) && !isNaN(parseFloat(str));
+        }
+
+        function isTextOnly(value) {
+            return value && value !== "0" && !isNumeric(value) && !value.includes("%");
+        }
+
+        function getStatus(progress) {
+            if (!progress || progress === "0" || progress === "0%") {
+                return "not-started";
+            }
+            const numProgress = parseFloat(progress);
+            if (numProgress >= 100) {
+                return "completed";
+            }
+            return "in-progress";
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                "completed": '<span class="status-badge status-completed">Completed</span>',
+                "in-progress": '<span class="status-badge status-in-progress">In Progress</span>',
+                "not-started": '<span class="status-badge status-not-started">Not Started</span>'
+            };
+            return badges[status] || badges["not-started"];
+        }
+
+        function getProgressBar(progress) {
+            if (!progress || progress === "0") {
+                return '<div class="progress-bar"><div class="progress-fill" style="width: 0%"><div class="progress-text">0%</div></div></div>';
+            }
+            
+            const numProgress = parseFloat(progress);
+            if (isNaN(numProgress)) {
+                return '<div class="text-only">Text Data</div>';
+            }
+            
+            const clampedProgress = Math.min(Math.max(numProgress, 0), 100);
+            return `<div class="progress-bar"><div class="progress-fill" style="width: ${clampedProgress}%"><div class="progress-text">${clampedProgress}%</div></div></div>`;
+        }
+
+        function formatCellContent(content) {
+            if (isTextOnly(content)) {
+                return `<div class="text-only">${content}</div>`;
+            }
+            return content;
+        }
+
+        function calculateProgress(q1, q2, targetValue) {
+            // If we have a specific progress value, use it
+            if (targetValue && targetValue.includes('%')) {
+                return targetValue;
+            }
+            
+            // For text-only entries, estimate progress based on content
+            if (isTextOnly(q2) && q2 !== "0") {
+                if (q2.toLowerCase().includes('completed') || q2.toLowerCase().includes('done')) {
+                    return "100%";
+                } else if (q2.toLowerCase().includes('planning') || q2.toLowerCase().includes('preparing')) {
+                    return "25%";
+                } else if (q2.toLowerCase().includes('ongoing') || q2.toLowerCase().includes('progress')) {
+                    return "50%";
+                } else if (q2.toLowerCase().includes('assessment') || q2.toLowerCase().includes('selected')) {
+                    return "60%";
+                } else {
+                    return "30%";
+                }
+            }
+            
+            // For numeric values, calculate if we have a target
+            if (isNumeric(q2) && parseFloat(q2) > 0) {
+                return "50%"; // Assume 50% if we have activity but no clear target
+            }
+            
+            return "0%";
+        }
+
+        // Process data and add calculated progress where missing
+        const processedData = kpiData.map(item => {
+            if (!item.progress || item.progress === "0") {
+                item.progress = calculateProgress(item.q1, item.q2, item.progress);
+            }
+            return item;
+        });
+
+        // Populate filter options
+        function populateFilters() {
+            const targets = [...new Set(processedData.map(item => item.globalTarget))];
+            const countries = [...new Set(processedData.map(item => item.country))];
+            
+            const targetFilter = document.getElementById('targetFilter');
+            const countryFilter = document.getElementById('countryFilter');
+            
+            targets.forEach(target => {
+                const option = document.createElement('option');
+                option.value = target;
+                option.textContent = target;
+                targetFilter.appendChild(option);
+            });
+            
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country;
+                option.textContent = country;
+                countryFilter.appendChild(option);
+            });
+        }
+
+        // Filter data based on selected filters
+        function filterData() {
+            const targetFilter = document.getElementById('targetFilter').value;
+            const countryFilter = document.getElementById('countryFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            return processedData.filter(item => {
+                const matchesTarget = targetFilter === 'all' || item.globalTarget === targetFilter;
+                const matchesCountry = countryFilter === 'all' || item.country === countryFilter;
+                const status = getStatus(item.progress);
+                const matchesStatus = statusFilter === 'all' || status === statusFilter;
+                
+                return matchesTarget && matchesCountry && matchesStatus;
+            });
+        }
+
+        // Update statistics
+        function updateStats(filteredData) {
+            const total = filteredData.length;
+            const completed = filteredData.filter(item => getStatus(item.progress) === 'completed').length;
+            const inProgress = filteredData.filter(item => getStatus(item.progress) === 'in-progress').length;
+            
+            const progressValues = filteredData
+                .map(item => parseFloat(item.progress))
+                .filter(val => !isNaN(val));
+            
+            const avgProgress = progressValues.length > 0 
+                ? Math.round(progressValues.reduce((a, b) => a + b, 0) / progressValues.length)
+                : 0;
+            
+            document.getElementById('totalKPIs').textContent = total;
+            document.getElementById('completedKPIs').textContent = completed;
+            document.getElementById('inProgressKPIs').textContent = inProgress;
+            document.getElementById('avgProgress').textContent = avgProgress + '%';
+        }
+
+        // Render table
+        function renderTable(data) {
+            const tbody = document.getElementById('kpiTableBody');
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="no-data">No data matches the selected filters</td></tr>';
+                return;
+            }
+            
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                const status = getStatus(item.progress);
+                
+                row.innerHTML = `
+                    <td>${item.globalTarget}</td>
+                    <td><span class="country-flag">🌍</span>${item.country}</td>
+                    <td>${formatCellContent(item.kpis)}</td>
+                    <td>${formatCellContent(item.metrics)}</td>
+                    <td>${formatCellContent(item.q1)}</td>
+                    <td>${formatCellContent(item.q2)}</td>
+                    <td>${getProgressBar(item.progress)}</td>
+                    <td>${getStatusBadge(status)}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Initialize dashboard
+        function initDashboard() {
+            populateFilters();
+            
+            const filteredData = filterData();
+            updateStats(filteredData);
+            renderTable(filteredData);
+            
+            // Add event listeners for filters
+            document.getElementById('targetFilter').addEventListener('change', function() {
+                const filteredData = filterData();
+                updateStats(filteredData);
+                renderTable(filteredData);
+            });
+            
+            document.getElementById('countryFilter').addEventListener('change', function() {
+                const filteredData = filterData();
+                updateStats(filteredData);
+                renderTable(filteredData);
+            });
+            
+            document.getElementById('statusFilter').addEventListener('change', function() {
+                const filteredData = filterData();
+                updateStats(filteredData);
+                renderTable(filteredData);
+            });
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>
